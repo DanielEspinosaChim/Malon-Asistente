@@ -1,0 +1,9 @@
+services:
+  maleon-avatar:
+    build: .
+    container_name: maleon_service
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    restart: always
