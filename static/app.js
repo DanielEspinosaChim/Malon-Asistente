@@ -1,18 +1,21 @@
-const btn = document.getElementById('btn-hablar');
+const btn = document.getElementById('mic-btn'); 
+const avatarWrapper = document.getElementById('avatar-img');
 const mouth = document.getElementById('mouth-img');
 const eyes = document.getElementById('eyes-img');
 const statusText = document.getElementById('status');
+const avatarContainer = document.getElementById('avatar-container');
 
 // Configuración de Voz
 const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
 const synthesis = window.speechSynthesis;
 recognition.lang = 'es-MX';
-recognition.continuous = true;      // Mantenemos abierto hasta que el usuario decida
-recognition.interimResults = true;  // Permite ver resultados parciales
+recognition.continuous = true;      
+recognition.interimResults = true;  
 
 let isListening = false;
 let finalTranscript = '';
 
+// Lógica de Parpadeo
 function parpadear() {
     eyes.style.opacity = "1";
     setTimeout(() => { eyes.style.opacity = "0"; }, 150);
@@ -26,6 +29,20 @@ const mouthMap = {
     'f': 'F_V', 'v': 'F_V', 'm': 'M_P_B', 'p': 'M_P_B', 'b': 'M_P_B',
     'n': 'N_D', 'd': 'N_D', 'l': 'N_D', 't': 'N_D', 's': 'N_D', 'r': 'N_D'
 };
+
+/**
+ * Limpia el formato Markdown para que la síntesis de voz no lea los símbolos
+ */
+function cleanMarkdown(text) {
+    return text
+        .replace(/(\*\*|__)(.*?)\1/g, '$2')          // Negritas
+        .replace(/(\*|_)(.*?)\1/g, '$2')             // Cursivas
+        .replace(/#+\s?(.*)/g, '$1')                 // Títulos (#)
+        .replace(/`{1,3}(.*?)`{1,3}/g, '$1')         // Código (backticks)
+        .replace(/\[(.*?)\]\(.*?\)/g, '$1')          // Enlaces [texto](url) -> texto
+        .replace(/(\r\n|\n|\r)/gm, " ")               // Saltos de línea por espacios
+        .trim();
+}
 
 function animarBocaSincronizada(texto) {
     let currentLetter = 0;
@@ -41,28 +58,27 @@ function animarBocaSincronizada(texto) {
     }, 80);
 }
 
-// MANEJO DEL BOTÓN (TOGGLE)
+// TOGGLE DE CONTROL
 btn.onclick = () => {
     if (!isListening) {
-        // --- PRIMER CLIC: INICIAR ---
-        if (synthesis.speaking) synthesis.cancel(); // Silenciar si estaba hablando
+        if (synthesis.speaking) synthesis.cancel();
         
         finalTranscript = '';
         recognition.start();
         isListening = true;
         
         btn.innerText = 'Escuchando... 🟥';
-        btn.classList.add('active'); // Por si quieres darle estilo CSS
+        btn.classList.add('active'); 
+        avatarContainer.classList.add('active');
         statusText.innerText = "Maleón te escucha atentamente...";
-        mouth.src = "/avatar/mouth_neutral.png";
     } else {
-        // --- SEGUNDO CLIC: ENVIAR ---
         recognition.stop();
         isListening = false;
         
-        btn.innerText = 'PULSAR PARA HABLAR';
+        btn.innerText = 'Pulsar para hablar';
         btn.classList.remove('active');
-        statusText.innerText = "Procesando mensaje...";
+        avatarContainer.classList.remove('active');
+        statusText.innerText = "Procesando...";
     }
 };
 
@@ -75,12 +91,10 @@ recognition.onresult = (event) => {
             interimTranscript += event.results[i][0].transcript;
         }
     }
-    // Mostramos lo que el usuario está diciendo en tiempo real
     statusText.innerText = "Diciendo: " + (finalTranscript + interimTranscript);
 };
 
 recognition.onend = () => {
-    // Si dejamos de escuchar y tenemos texto, enviamos al backend
     if (!isListening && finalTranscript.trim() !== '') {
         enviarAlBackend(finalTranscript);
     }
@@ -96,18 +110,23 @@ async function enviarAlBackend(texto) {
         });
         
         const data = await response.json();
-        const textoLimpio = data.reply.replace(/[^\wáéíóúñ\s]/gi, '');
+        
+        // --- LIMPIEZA DE MARKDOWN PARA VOZ ---
+        const textoParaVoz = cleanMarkdown(data.reply);
+        
+        // Limpiamos emojis y caracteres raros para la animación de la boca
+        const textoParaBoca = textoParaVoz.replace(/[^\wáéíóúñ\s]/gi, '');
 
-        const utterance = new SpeechSynthesisUtterance(data.reply);
+        const utterance = new SpeechSynthesisUtterance(textoParaVoz);
         utterance.lang = 'es-MX';
         
         utterance.onstart = () => {
-            statusText.innerText = "Maleón respondiendo...";
-            animarBocaSincronizada(textoLimpio);
+            statusText.innerText = data.reply; // Mostramos el texto original (con Markdown si lo tiene)
+            animarBocaSincronizada(textoParaBoca);
         };
 
         utterance.onend = () => {
-            statusText.innerText = "Esperando interacción...";
+            statusText.innerText = "Listo para conversar";
             mouth.src = "/avatar/mouth_neutral.png";
         };
         
@@ -115,6 +134,5 @@ async function enviarAlBackend(texto) {
     } catch (error) {
         console.error("Error:", error);
         statusText.innerText = "Error de conexión.";
-        btn.innerText = 'PULSAR PARA HABLAR';
     }
 }
