@@ -2,18 +2,31 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Maleón - Avatar Inteligente</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maleón - Asistente IA Yucateco</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+    <!-- Marco de Vegetación -->
+    <div class="jungle-frame">
+        <div class="leaf leaf-1">🌿</div>
+        
+        <div class="leaf leaf-4">🌿</div>
+    </div>
+
+    <h1>MALEÓN ASISTENTE</h1>
+
     <div id="avatar-container">
         <img src="/avatar/head.png" class="layer" alt="Base">
         <img src="/avatar/mouth_neutral.png" id="mouth-img" class="layer" alt="Mouth">
         <img src="/avatar/eyes_closed.png" id="eyes-img" class="layer" style="opacity: 0;" alt="Eyes">
     </div>
 
-    <button id="btn-hablar">PULSAR PARA HABLAR</button>
-    <p id="status">Esperando interacción...</p>
+    <button id="btn-hablar">Pulsar para hablar</button>
+
+    <div class="status-container">
+        <p id="status">Esperando interacción...</p>
+    </div>
 
     <script src="/static/app.js"></script>
 </body>

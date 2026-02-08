@@ -1,21 +1,50 @@
+:root {
+    --bg-color: #1a1a2e;
+    --card-bg: #16213e;
+    --accent-color: #4ecca3;
+    --accent-secondary: #45b293;
+    --gold-accent: #d4af37;
+    --text-color: #eeeeee;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
 body {
-    background: #0f0f0f;
-    color: white;
+    background: var(--bg-color);
+    background: radial-gradient(circle, #1a1a2e 0%, #0f3460 100%);
+    color: var(--text-color);
     display: flex;
     flex-direction: column;
     align-items: center;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+h1 {
+    margin-bottom: 30px;
+    font-weight: 300;
+    letter-spacing: 2px;
+    color: var(--accent-color);
 }
 
 #avatar-container {
     position: relative;
-    width: 450px;
-    height: 450px;
-    margin-top: 50px;
-    background: #000;
-    border: 4px solid #333;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    width: 350px;
+    height: 350px;
+    background: var(--card-bg);
+    border: 3px solid var(--gold-accent); /* Mantenemos el marco dorado */
+    border-radius: 50%;
+    box-shadow: var(--shadow), 0 0 20px rgba(212, 175, 55, 0.2);
+    overflow: hidden;
+    margin-bottom: 40px;
+    transition: all 0.5s ease;
+}
+
+/* Efecto de resplandor cuando Maleón está "activo" */
+#avatar-container.active {
+    box-shadow: 0 0 40px rgba(78, 204, 163, 0.4);
+    border-color: var(--accent-color);
 }
 
 .layer {
@@ -24,30 +53,99 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
 }
 
-button {
-    margin-top: 30px;
-    padding: 15px 40px;
-    font-size: 1.2rem;
-    font-weight: bold;
+#btn-hablar {
+    padding: 16px 48px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
     border: none;
-    border-radius: 50px;
-    background: #00ff88;
-    color: #121212;
+    border-radius: 12px;
+    background: var(--accent-color);
+    color: #1b262c;
     cursor: pointer;
-    transition: 0.2s ease;
+    box-shadow: 0 4px 15px rgba(78, 204, 163, 0.3);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-button:hover {
-    transform: scale(1.05);
-    background: #00cc6e;
+#btn-hablar:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(78, 204, 163, 0.4);
+    background: var(--accent-secondary);
+}
+
+#btn-hablar:active {
+    transform: translateY(0);
+}
+
+#btn-hablar.active {
+    background: #e94560;
+    box-shadow: 0 4px 15px rgba(233, 69, 96, 0.3);
+    color: white;
+}
+
+.status-container {
+    margin-top: 30px;
+    padding: 20px;
+    max-width: 500px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    backdrop-filter: blur(5px);
 }
 
 #status {
-    margin-top: 20px;
-    color: #00ff88;
+    color: var(--accent-color);
     font-size: 1rem;
-    font-style: italic;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* Marco de Vegetación Yucateca */
+.jungle-frame {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+    overflow: hidden;
+}
+
+.leaf {
+    position: absolute;
+    font-size: 120px;
+    filter: drop-shadow(0 0 10px rgba(0,0,0,0.5)) contrast(0.8) brightness(0.6);
+    opacity: 0.6;
+    animation: sway 6s ease-in-out infinite alternate;
+}
+
+.leaf-1 { top: -20px; left: -20px; transform: rotate(45deg); }
+.leaf-2 { top: -30px; right: -20px; transform: rotate(-30deg); animation-delay: 1s; }
+.leaf-3 { bottom: -20px; left: -30px; transform: rotate(120deg); animation-delay: 2s; }
+.leaf-4 { bottom: -30px; right: -20px; transform: rotate(-120deg); animation-delay: 1.5s; }
+
+@keyframes sway {
+    from { transform: rotate(40deg) translateY(0); }
+    to { transform: rotate(50deg) translateY(10px); }
+}
+
+@keyframes sway-alt {
+    from { transform: rotate(-25deg) translateX(0); }
+    to { transform: rotate(-35deg) translateX(10px); }
+}
+
+/* Animación sutil de respiración */
+@keyframes breathing {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+
+#avatar-container img:first-child {
+    animation: breathing 4s ease-in-out infinite;
 }
