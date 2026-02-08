@@ -1,5 +1,4 @@
-const btn = document.getElementById('mic-btn'); 
-const avatarWrapper = document.getElementById('avatar-img');
+const btn = document.getElementById('btn-hablar'); 
 const mouth = document.getElementById('mouth-img');
 const eyes = document.getElementById('eyes-img');
 const statusText = document.getElementById('status');
@@ -58,7 +57,7 @@ function animarBocaSincronizada(texto) {
     }, 80);
 }
 
-// TOGGLE DE CONTROL
+// MANEJO DEL BOTÓN (TOGGLE)
 btn.onclick = () => {
     if (!isListening) {
         if (synthesis.speaking) synthesis.cancel();
