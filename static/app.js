@@ -78,7 +78,7 @@ btn.onclick = () => {
         btn.innerText = 'Pulsar para hablar';
         btn.classList.remove('active');
         avatarContainer.classList.remove('active');
-        statusText.innerText = "Procesando...";
+        statusText.innerText = "Procesando mensaje...";
     }
 };
 
@@ -134,5 +134,6 @@ async function enviarAlBackend(texto) {
     } catch (error) {
         console.error("Error:", error);
         statusText.innerText = "Error de conexión.";
+        btn.innerText = 'Pulsar para hablar';
     }
 }
