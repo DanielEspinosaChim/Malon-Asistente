@@ -46,9 +46,8 @@ class GroqChat:
         payload = {
             "model": self.model,
             "messages": msgs,
-            "temperature": 0.3,
-            "max_tokens": 200,
-            "presence_penalty": 0.6
+            "temperature": 0.8,
+            "max_tokens": 400  
         }
         r = requests.post(
             self.url,
@@ -92,7 +91,6 @@ class MaleonChatAgent:
                     "haces preguntas de manera indirecta y casual, "
                     "como parte de una plática normal, nunca como un interrogatorio. "
                     "Tu prioridad es que la persona se sienta cómoda hablando contigo."
-                    "Nunca dejes una frase a medias."
                 )
             )
         ]
