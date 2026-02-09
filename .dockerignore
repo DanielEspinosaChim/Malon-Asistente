@@ -5,3 +5,10 @@ __pycache__
 .gitignore
 README.md
 .env
+venv/
+__pycache__/
+.env
+.git
+temp_audio/
+*.mp3
+cache_inteligente.json  
