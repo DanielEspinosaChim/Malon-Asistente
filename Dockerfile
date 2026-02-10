@@ -21,6 +21,6 @@ COPY . .
 
 # 5. Pasos finales
 RUN mkdir -p temp_audio
-EXPOSE 8000
+EXPOSE 9000
 
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "9000"]

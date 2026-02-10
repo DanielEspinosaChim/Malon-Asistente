@@ -3,3 +3,12 @@ venv/
 __pycache__/
 .DS_Store
 *.pyc
+catboost_info/
+*.cbm
+memoria_maleon.json
+cache_inteligente.json
+temp_audio/
+*.ipynb
+*.csv
+.jupyter/
+.ipynb_checkpoints/
