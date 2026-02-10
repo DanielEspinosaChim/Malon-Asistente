@@ -8,15 +8,20 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from google.cloud import texttospeech
 from thefuzz import fuzz, process
+from dotenv import load_dotenv
 
-try:
-    from Agente import MaleonChatAgent
-except ImportError:
-    raise RuntimeError("Revisa que el archivo se llame Agente.py (con A mayúscula).")
+load_dotenv()
+
+from Agente import MaleonChatAgent
 
 app = FastAPI()
 bot = MaleonChatAgent()
-client = texttospeech.TextToSpeechClient()
+
+# Configuramos el cliente con el proyecto de cuota explícito
+PROJECT_ID = os.getenv("GCP_PROJECT_ID", "maleon")
+client = texttospeech.TextToSpeechClient(
+    client_options={"quota_project_id": PROJECT_ID}
+)
 
 CACHE_FILE = "cache_inteligente.json"
 BLACKLIST = ["clima", "tiempo", "hora", "hoy", "ayer", "mañana"]
@@ -41,6 +46,7 @@ app.mount("/temp_audio", StaticFiles(directory="temp_audio"), name="temp_audio")
 
 class Msg(BaseModel):
     text: str
+    time: str = None # Añadimos el campo opcional de hora
 
 @app.post("/chat")
 async def chat(msg: Msg):
@@ -56,7 +62,7 @@ async def chat(msg: Msg):
             # Usamos token_set_ratio que es mejor para frases con palabras movidas o typos
             mejor_match, score = process.extractOne(texto_input, cache_memoria.keys(), scorer=fuzz.token_set_ratio)
             
-            if score > 75: # Bajamos el rigor para que "marian" y "marion" sean lo mismo
+            if score > 75: 
                 match_clave = mejor_match
                 print(f">>> Match detectado ({score}%): {match_clave}")
 
@@ -76,8 +82,8 @@ async def chat(msg: Msg):
             else:
                 return random.choice(variantes)
 
-        # 3. GENERAR RESPUESTA NUEVA (Groq + TTS)
-        respuesta_texto = bot.handle(msg.text)
+        # 3. GENERAR RESPUESTA NUEVA (Gemini + TTS)
+        respuesta_texto = bot.handle(msg.text, user_time=msg.time)
         
         # Síntesis de Google Cloud (La voz que calibramos)
         synthesis_input = texttospeech.SynthesisInput(text=respuesta_texto)

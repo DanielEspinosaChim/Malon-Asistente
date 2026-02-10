@@ -12,8 +12,11 @@ recognition.interimResults = true;
 
 let isListening = false;
 let finalTranscript = '';
+let currentAudio = null; // Para controlar el audio actual
+let abortController = null; // Para cancelar peticiones fetch pendientes
 
 // --- LÓGICA DE PARPADEO ---
+// ... (mismo código de parpadeo)
 function parpadear() {
     eyes.style.opacity = "1";
     setTimeout(() => { eyes.style.opacity = "0"; }, 150);
@@ -33,7 +36,7 @@ const mouthMap = {
 function animarBocaSincronizada(texto, audio) {
     let currentLetter = 0;
     const interval = setInterval(() => {
-        if (audio.paused || audio.ended) {
+        if (!audio || audio.paused || audio.ended) {
             mouth.src = "/avatar/mouth_neutral.png";
             clearInterval(interval);
             return;
@@ -49,17 +52,34 @@ function animarBocaSincronizada(texto, audio) {
 
 // --- MANEJO DEL BOTÓN ---
 btn.onclick = () => {
+    // Si hay audio sonando, lo detenemos
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio = null;
+        mouth.src = "/avatar/mouth_neutral.png";
+    }
+
+    // Si hay una petición al backend pendiente, la cancelamos
+    if (abortController) {
+        abortController.abort();
+        abortController = null;
+    }
+
     if (!isListening) {
         finalTranscript = '';
-        recognition.start();
-        isListening = true;
-
-        btn.innerText = 'PULSAR PARA HABLAR 🟥';
-        statusText.innerText = "Maleón te escucha atentamente...";
+        try {
+            recognition.start();
+            isListening = true;
+            avatarContainer.classList.add('listening'); // Efecto visual
+            btn.innerText = 'PULSAR PARA DETENER 🟥';
+            statusText.innerText = "Maleón te escucha atentamente...";
+        } catch (e) {
+            console.error("Error al iniciar reconocimiento:", e);
+        }
     } else {
         recognition.stop();
         isListening = false;
-
+        avatarContainer.classList.remove('listening'); // Quitar efecto visual
         btn.innerText = 'PULSAR PARA HABLAR';
         statusText.innerText = "Procesando mensaje...";
     }
@@ -78,42 +98,69 @@ recognition.onresult = (event) => {
 };
 
 recognition.onend = () => {
+    avatarContainer.classList.remove('listening'); // Por seguridad
     if (!isListening && finalTranscript.trim() !== '') {
-        enviarAlBackend(finalTranscript);
+        const textoAEnviar = finalTranscript;
+        finalTranscript = ''; // Limpiamos inmediatamente para evitar reenvíos
+        
+        // Obtenemos la hora actual del usuario
+        const ahora = new Date();
+        const horaStr = ahora.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+        
+        enviarAlBackend(textoAEnviar, horaStr);
+    } else if (!isListening) {
+        statusText.innerText = "Esperando interacción...";
     }
 };
 
 // --- ENVÍO AL BACKEND Y REPRODUCCIÓN DE AUDIO ---
-async function enviarAlBackend(texto) {
+async function enviarAlBackend(texto, hora = null) {
     statusText.innerText = "Maleón está pensando...";
+    
+    // Creamos un nuevo controlador para esta petición
+    abortController = new AbortController();
+
     try {
+        const bodyData = { text: texto };
+        if (hora) bodyData.time = hora; // Enviamos la hora
+
         const response = await fetch('/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: texto })
+            body: JSON.stringify(bodyData),
+            signal: abortController.signal
         });
 
         const data = await response.json();
+        abortController = null; // Petición terminada con éxito
 
         const textoLimpio = data.reply.replace(/[^\wáéíóúñ\s]/gi, '');
 
-        const audio = new Audio(data.audio_url);
+        // Detenemos cualquier audio previo por si acaso
+        if (currentAudio) currentAudio.pause();
+        
+        currentAudio = new Audio(data.audio_url);
 
-        audio.onplay = () => {
-            statusText.innerText = "Maleón respondiendo...";
-            animarBocaSincronizada(textoLimpio, audio);
+        currentAudio.onplay = () => {
+            statusText.innerText = data.reply; // Mostramos la respuesta real
+            animarBocaSincronizada(textoLimpio, currentAudio);
         };
 
-        audio.onended = () => {
+        currentAudio.onended = () => {
             statusText.innerText = "Esperando interacción...";
             mouth.src = "/avatar/mouth_neutral.png";
+            currentAudio = null;
         };
 
-        audio.play();
+        currentAudio.play();
 
     } catch (error) {
-        console.error("Error:", error);
-        statusText.innerText = "¡Ay mare! Falló la conexión.";
-        btn.innerText = 'PULSAR PARA HABLAR';
+        if (error.name === 'AbortError') {
+            console.log("Petición cancelada porque el usuario inició otra acción.");
+        } else {
+            console.error("Error:", error);
+            statusText.innerText = "¡Ay mare! Falló la conexión.";
+            btn.innerText = 'PULSAR PARA HABLAR';
+        }
     }
 }

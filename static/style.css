@@ -41,10 +41,20 @@ h1 {
     transition: all 0.5s ease;
 }
 
-/* Efecto de resplandor cuando Maleón está "activo" */
-#avatar-container.active {
-    box-shadow: 0 0 40px rgba(78, 204, 163, 0.4);
+/* Efecto de resplandor cuando Maleón está "activo" o escuchando */
+#avatar-container.active, #avatar-container.listening {
+    box-shadow: 0 0 40px rgba(78, 204, 163, 0.6);
     border-color: var(--accent-color);
+}
+
+#avatar-container.listening {
+    animation: pulse-glow 2s infinite;
+}
+
+@keyframes pulse-glow {
+    0% { box-shadow: 0 0 20px rgba(78, 204, 163, 0.4); }
+    50% { box-shadow: 0 0 50px rgba(78, 204, 163, 0.8); }
+    100% { box-shadow: 0 0 20px rgba(78, 204, 163, 0.4); }
 }
 
 .layer {

@@ -1,0 +1,128 @@
+{
+  "joaquin_diaz_mena": {
+    "nombre": "Mtro. Joaquín Díaz Mena",
+    "cargo": "Gobernador del Estado de Yucatán",
+    "alias": ["huacho", "gobernador", "diaz mena", "joaquin diaz", "gober"],
+    "temas": "Renacimiento Maya, bienestar social, infraestructura, Tren Maya, apoyo al campo, modernización del estado."
+  },
+  "cecilia_patron": {
+    "nombre": "Lic. Cecilia Patrón Laviada",
+    "cargo": "Alcaldesa de Mérida",
+    "alias": ["cecilia", "alcaldesa", "ceci patron", "patron laviada"],
+    "temas": "Servicios públicos, Mérida chula, iluminación, atención ciudadana, parques y espacios públicos."
+  },
+  "jose_molina": {
+    "nombre": "Lic. José Enrique Molina Casares",
+    "cargo": "Presidente de CANACO SERVYTUR Mérida",
+    "alias": ["molina casares", "canaco", "presidente canaco", "jose enrique molina"],
+    "temas": "Comercio, turismo, empresarios, derrama económica, sector servicios."
+  },
+  "mauricio_vales": {
+    "nombre": "Lic. Mauricio Vales Casares",
+    "cargo": "Presidente del Consejo Directivo del IMET",
+    "alias": ["mauricio vales", "presidente imet", "consejo imet"],
+    "temas": "Visión tecnológica, educación superior, futuro del IMET, liderazgo educativo."
+  },
+  "daniel_granja": {
+    "nombre": "Mtro. Daniel Granja Peniche",
+    "cargo": "Socio fundador del IMET",
+    "alias": ["daniel granja", "socio imet", "granja peniche"],
+    "temas": "Fundación del IMET, historia educativa, legado institucional."
+  },
+  "alejandra_patron": {
+    "nombre": "Mtra. Alejandra Patrón Puerto",
+    "cargo": "Directora General del IMET",
+    "alias": ["alejandra patron", "directora imet", "patron puerto"],
+    "temas": "Gestión educativa, excelencia académica, dirección institucional."
+  },
+  "juan_balam": {
+    "nombre": "Mtro. Juan Enrique Balam Várguez",
+    "cargo": "Secretario de Educación del Estado de Yucatán (SEGEY)",
+    "alias": ["juan balam", "secretario educacion", "segey", "balam varguez"],
+    "temas": "Calidad educativa, escuelas, maestros, futuro de la educación en Yucatán."
+  },
+  "ermilo_barrera": {
+    "nombre": "Mtro. Ermilo Barrera Novelo",
+    "cargo": "Secretario de Economía y Trabajo (SEFOET)",
+    "alias": ["ermilo", "secretario economia", "sefoet", "barrera novelo"],
+    "temas": "Inversión extranjera, generación de empleos, nearshoring, desarrollo económico."
+  },
+  "carlos_macari": {
+    "nombre": "Mtro. Carlos Macari Ponce",
+    "cargo": "Socio fundador del IMET",
+    "alias": ["carlos macari", "socio fundador", "macari ponce"],
+    "temas": "Visión empresarial, fundación educativa."
+  },
+  "alejandro_gomory": {
+    "nombre": "Mtro. Alejandro Gomory Martínez",
+    "cargo": "Presidente de CANACINTRA Yucatán",
+    "alias": ["gomory", "canacintra", "alejandro gomory", "industriales"],
+    "temas": "Industria, transformación, gas natural, energía, sector industrial."
+  },
+  "emilio_blanco": {
+    "nombre": "Mtro. Emilio Blanco del Villar",
+    "cargo": "Presidente de la COPARMEX Mérida",
+    "alias": ["emilio blanco", "coparmex", "blanco del villar"],
+    "temas": "Empresas, desarrollo inclusivo, sector patronal, responsabilidad social."
+  },
+  "oscar_brito": {
+    "nombre": "Mtro. Oscar Brito Zapata",
+    "cargo": "Diputado Federal por el Distrito 3 de Mérida",
+    "alias": ["oscar brito", "diputado", "brito zapata", "legislador"],
+    "temas": "Gestión federal, leyes, representación ciudadana, distrito 3."
+  },
+  "geovani_campos": {
+    "nombre": "Dra. Geovani Cecilia Campos Vázquez",
+    "cargo": "Secretaria de Ciencia, Humanidades, Tecnología e Innovación (SIIES)",
+    "alias": ["geovani", "siies", "ciencia", "campos vazquez", "secretaria ciencia"],
+    "temas": "Innovación tecnológica, investigación, becas, desarrollo científico, humanidades."
+  },
+  "mirna_manzanilla": {
+    "nombre": "Mtra. Mirna Manzanilla Romero",
+    "cargo": "Directora de Educación Superior del Estado",
+    "alias": ["mirna manzanilla", "educacion superior", "manzanilla romero"],
+    "temas": "Universidades, posgrados, vinculación universitaria."
+  },
+  "alpha_tavera": {
+    "nombre": "Mtra. Alpha Alejandra Tavera Escalante",
+    "cargo": "Subsecretaria de Innovación del Estado",
+    "alias": ["alpha tavera", "subsecretaria innovacion", "tavera escalante"],
+    "temas": "Tecnología, modernización, proyectos innovadores."
+  },
+  "alejandro_chulim": {
+    "nombre": "Mtro. Alejandro Chulim Cimé",
+    "cargo": "Secretario General del SNTE 57",
+    "alias": ["chulim", "snte", "sindicato", "maestros", "chulim cime"],
+    "temas": "Derechos magisteriales, educación pública, docentes."
+  },
+  "miguel_baquedano": {
+    "nombre": "Dr. Miguel Baquedano Dajdaj",
+    "cargo": "Ex Rector de la Universidad Marista de Mérida",
+    "alias": ["miguel baquedano", "ex rector", "baquedano", "universidad marista"],
+    "temas": "Educación humanista, valores, trayectoria académica."
+  },
+  "margely_bacelis": {
+    "nombre": "Lic. Margely Bacelis Arzápalo",
+    "cargo": "Directora de Programas Académicos del IMET",
+    "alias": ["margely", "programas academicos", "bacelis"],
+    "temas": "Planes de estudio, calidad académica, alumnos."
+  },
+  "soemmy_reyes": {
+    "nombre": "Mtra. Soemmy Guadalupe Reyes Noh",
+    "cargo": "Directora Comercial del IMET",
+    "alias": ["soemmy", "directora comercial", "reyes noh"],
+    "temas": "Vinculación, admisiones, promoción educativa."
+  },
+  "georgina_valdez": {
+    "nombre": "Lic. Georgina Valdez Tepal",
+    "cargo": "Directora de Administración del IMET",
+    "alias": ["georgina", "directora administracion", "valdez tepal"],
+    "temas": "Recursos, gestión administrativa, operación."
+  },
+  "michael_balderas": {
+    "nombre": "Ing. Michael Grayeb Balderas Aceves",
+    "cargo": "Decano de Tecnología del IMET",
+    "alias": ["michael", "decano", "ingeniero balderas", "mike"],
+    "temas": "Inteligencia Artificial, desarrollo de software, alumnos de tecnología, innovación en el aula."
+  }
+}
