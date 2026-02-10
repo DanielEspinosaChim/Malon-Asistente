@@ -5,3 +5,37 @@ __pycache__
 .gitignore
 README.md
 .env
+venv/
+__pycache__/
+.env
+.git
+temp_audio/
+*.mp3
+cache_inteligente.json  
+
+# Git
+.git
+.gitignore
+
+# Datos y modelos
+data/
+*.csv
+*.cbm
+*.mp3
+catboost_info/
+temp_audio/
+
+# Notebooks
+*.ipynb
+
+# Cache y outputs
+cache_inteligente.json
+resultado_clusters_*.csv
+
+# Python
+__pycache__/
+*.pyc
+.env
+
+# Otros
+.DS_Store
