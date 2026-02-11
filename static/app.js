@@ -134,25 +134,46 @@ async function enviarAlBackend(texto, hora = null) {
         const data = await response.json();
         abortController = null; // Petición terminada con éxito
 
+        if (!data || !data.reply) {
+            throw new Error("Respuesta del servidor incompleta");
+        }
+
         const textoLimpio = data.reply.replace(/[^\wáéíóúñ\s]/gi, '');
 
         // Detenemos cualquier audio previo por si acaso
         if (currentAudio) currentAudio.pause();
         
-        currentAudio = new Audio(data.audio_url);
+        if (data.audio_url) {
+            currentAudio = new Audio();
+            
+            currentAudio.oncanplaythrough = () => {
+                currentAudio.play().catch(e => console.error("Error al reproducir:", e));
+            };
 
-        currentAudio.onplay = () => {
-            statusText.innerText = data.reply; // Mostramos la respuesta real
-            animarBocaSincronizada(textoLimpio, currentAudio);
-        };
+            currentAudio.onplay = () => {
+                statusText.innerHTML = data.reply;
+                animarBocaSincronizada(textoLimpio, currentAudio);
+            };
 
-        currentAudio.onended = () => {
-            statusText.innerText = "Esperando interacción...";
-            mouth.src = "/avatar/mouth_neutral.png";
-            currentAudio = null;
-        };
+            currentAudio.onerror = (e) => {
+                console.error("Error cargando audio:", e);
+                statusText.innerHTML = data.reply;
+            };
 
-        currentAudio.play();
+            currentAudio.onended = () => {
+                statusText.innerText = "Esperando interacción...";
+                mouth.src = "/avatar/mouth_neutral.png";
+                currentAudio = null;
+            };
+
+            currentAudio.src = data.audio_url; // Dispara la carga
+        } else {
+            // Si no hay audio, solo mostramos el texto
+            statusText.innerHTML = data.reply;
+            setTimeout(() => {
+                if (!currentAudio) statusText.innerText = "Esperando interacción...";
+            }, 5000);
+        }
 
     } catch (error) {
         if (error.name === 'AbortError') {
@@ -162,5 +183,7 @@ async function enviarAlBackend(texto, hora = null) {
             statusText.innerText = "¡Ay mare! Falló la conexión.";
             btn.innerText = 'PULSAR PARA HABLAR';
         }
+    } finally {
+        abortController = null;
     }
 }

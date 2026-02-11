@@ -2,6 +2,7 @@ import os
 import uuid
 import json
 import random
+import re
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -85,8 +86,11 @@ async def chat(msg: Msg):
         # 3. GENERAR RESPUESTA NUEVA (Gemini + TTS)
         respuesta_texto = bot.handle(msg.text, user_time=msg.time)
         
+        # Limpiamos HTML para que el audio no lea los tags del botón
+        texto_para_audio = re.sub(r'<[^>]+>', '', respuesta_texto)
+
         # Síntesis de Google Cloud (La voz que calibramos)
-        synthesis_input = texttospeech.SynthesisInput(text=respuesta_texto)
+        synthesis_input = texttospeech.SynthesisInput(text=texto_para_audio)
         voice = texttospeech.VoiceSelectionParams(language_code="es-US", name="es-US-Neural2-B")
         audio_config = texttospeech.AudioConfig(
             audio_encoding=texttospeech.AudioEncoding.MP3,
@@ -114,8 +118,11 @@ async def chat(msg: Msg):
         return nueva_resp
 
     except Exception as e:
-        print(f"Error: {e}")
-        raise HTTPException(status_code=500, detail="Fallo en la matriz.")
+        print(f"Error crítico en /chat: {e}")
+        return {
+            "reply": "¡Ay fo! Hubo un errorcito en mi sistema, ¿podrías repetirme eso, nené?",
+            "audio_url": "" 
+        }
 
 @app.get("/")
 async def index():
