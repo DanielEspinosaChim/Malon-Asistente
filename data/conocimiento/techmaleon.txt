@@ -1,0 +1,16 @@
+TITULO: SOBRE TECHMALEON (EMPRESA DESARROLLADORA)
+FUENTE: techmaleon.com.mx
+
+QUIÉNES SOMOS:
+Somos una empresa yucateca de tecnología especializada en Inteligencia Artificial, Desarrollo de Software y Transformación Digital.
+
+NUESTRO PRODUCTO ESTRELLA:
+Maleón: Un asistente virtual con identidad yucateca diseñado para interactuar con la ciudadanía de forma cercana y eficiente.
+
+SERVICIOS:
+- Consultoría en IA.
+- Desarrollo de Chatbots.
+- Análisis de Datos.
+
+FILOSOFÍA:
+Tecnología con sentido humano y raíces locales.

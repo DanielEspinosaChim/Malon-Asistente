@@ -41,10 +41,20 @@ h1 {
     transition: all 0.5s ease;
 }
 
-/* Efecto de resplandor cuando Maleón está "activo" */
-#avatar-container.active {
-    box-shadow: 0 0 40px rgba(78, 204, 163, 0.4);
+/* Efecto de resplandor cuando Maleón está "activo" o escuchando */
+#avatar-container.active, #avatar-container.listening {
+    box-shadow: 0 0 40px rgba(78, 204, 163, 0.6);
     border-color: var(--accent-color);
+}
+
+#avatar-container.listening {
+    animation: pulse-glow 2s infinite;
+}
+
+@keyframes pulse-glow {
+    0% { box-shadow: 0 0 20px rgba(78, 204, 163, 0.4); }
+    50% { box-shadow: 0 0 50px rgba(78, 204, 163, 0.8); }
+    100% { box-shadow: 0 0 20px rgba(78, 204, 163, 0.4); }
 }
 
 .layer {
@@ -104,6 +114,35 @@ h1 {
     margin: 0;
 }
 
+/* --- ESTILOS DEL LOADER --- */
+.hidden {
+    display: none !important;
+}
+
+#loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 15px;
+    color: var(--accent-color);
+    font-weight: bold;
+}
+
+.spinner {
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-top: 4px solid var(--accent-color);
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
 /* Marco de Vegetación Yucateca */
 .jungle-frame {
     position: fixed;
@@ -150,46 +189,54 @@ h1 {
     animation: breathing 4s ease-in-out infinite;
 }
 
-/* Estilos de Patrocinadores */
-.sponsors-container {
-    margin-top: 50px;
+/* Header y Logos */
+.main-header {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    pointer-events: none;
+    box-sizing: border-box;
+}
+
+.header-logo-left, .header-logo-right {
+    pointer-events: auto;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 30px;
-    padding: 20px;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 20px;
-    backdrop-filter: blur(5px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    z-index: 10;
 }
 
 .sponsor-logo {
-    height: 40px;
+    height: 70px;
     width: auto;
-    opacity: 0.7;
-    filter: brightness(1.2);
+    opacity: 0.9;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4));
     transition: all 0.3s ease;
+}
+
+/* Ajuste individual para equilibrar tamaños visuales */
+.header-logo-right .sponsor-logo {
+    height: 85px; /* Un poco más grande para compensar su forma */
 }
 
 .sponsor-logo:hover {
     opacity: 1;
-    transform: scale(1.05);
-}
-
-.sponsor-divider {
-    width: 1px;
-    height: 30px;
-    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.08);
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
 }
 
 @media (max-width: 768px) {
-    .sponsors-container {
-        flex-direction: column;
-        gap: 20px;
+    .main-header {
+        padding: 15px 20px;
     }
-    .sponsor-divider {
-        display: none;
+    .sponsor-logo {
+        height: 45px;
     }
 }
