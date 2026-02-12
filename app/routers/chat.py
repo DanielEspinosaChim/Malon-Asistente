@@ -83,42 +83,54 @@ async def chat(msg: Msg):
     # --- Manejo de Inteligencia Especializada ---
     if isinstance(respuesta, dict) and respuesta.get("type") == "function_call":
         args = respuesta["args"]
-        muni_sucio = args.get("muni", "") # Capturamos el nombre tal cual viene del chat
+        muni_sucio = args.get("muni", "").strip()
         
         # CASO A: CRECIMIENTO (CatBoost)
         if respuesta["name"] == "predecir_crecimiento":
-            muni_real = intel_service.limpiar_municipio(muni_sucio, pilar="servicios") # Normalizamos
+            muni_real = intel_service.limpiar_municipio(muni_sucio, pilar="servicios")
             pred = intel_service.model_growth.predict([args["codigo"], muni_real, args["v1"], args["v2"], args["v3"]])[0]
-            
-            # Guardamos el resultado LIMPIO para el reporte PDF
             bot_personal.registrar_resultado("crecimiento", f"Negocio {pred} en {muni_real}")
             respuesta_texto = f"Mare nene, ese negocio en {muni_real} pinta para ser {pred}."
 
         # CASO B: SERVICIOS
         elif respuesta["name"] == "buscar_servicios":
-            muni_real = intel_service.limpiar_municipio(muni_sucio, pilar="servicios") # Normalizamos
-            filtro = intel_service.df_servicios[intel_service.df_servicios['NOM_MUN'] == muni_real]
-            
-            if not filtro.empty:
-                datos = filtro.iloc[0]
-                info = f"Situación: {datos['CATEGORIA']} - Desabasto: {datos['INDICE_DESABASTO']}"
-                bot_personal.registrar_resultado("servicios", info) # Se guarda para el reporte
-                respuesta_texto = f"Mira nene, en {muni_real} la situación es {datos['CATEGORIA']}. Ya lo anoté."
+            # --- LÓGICA ESTATAL YUCATÁN ---
+            if muni_sucio.lower() in ["yucatan", "yucatán", "estado", "todo el estado"]:
+                avg_desabasto = intel_service.df_servicios['INDICE_DESABASTO'].mean()
+                cat_top = intel_service.df_servicios['CATEGORIA'].mode()[0]
+                info = f"Análisis Estatal: {cat_top} - Desabasto Promedio: {avg_desabasto:.2f}"
+                bot_personal.registrar_resultado("servicios", info)
+                respuesta_texto = f"Maaa nené, en todo el estado la tendencia es {cat_top} ne’. Ya lo incluí en el análisis general para su reporte."
             else:
-                respuesta_texto = f"Mare nene, no encontré datos de servicios para {muni_real}."
+                muni_real = intel_service.limpiar_municipio(muni_sucio, pilar="servicios")
+                filtro = intel_service.df_servicios[intel_service.df_servicios['NOM_MUN'] == muni_real]
+                if not filtro.empty:
+                    datos = filtro.iloc[0]
+                    info = f"Municipio: {muni_real} - Situación: {datos['CATEGORIA']} - Desabasto: {datos['INDICE_DESABASTO']}"
+                    bot_personal.registrar_resultado("servicios", info)
+                    respuesta_texto = f"Mira nene, en {muni_real} la situación es {datos['CATEGORIA']}. Ya lo anoté."
+                else:
+                    respuesta_texto = f"Mare nene, no encontré datos específicos de {muni_sucio}, pero lo tomaremos como tendencia general ne’."
 
         # CASO C: SEGURIDAD
         elif respuesta["name"] == "consultar_seguridad":
-            muni_real = intel_service.limpiar_municipio(muni_sucio, pilar="seguridad") # Normalizamos
-            filtro = intel_service.df_seguridad[intel_service.df_seguridad['NOM_MUN'] == muni_real]
-            
-            if not filtro.empty:
-                datos = filtro.iloc[0]
-                info = f"Riesgo: {datos['CATEGORIA_SEGURIDAD']} - Aislados: {int(datos['NEGOCIOS_AISLADOS'])}"
-                bot_personal.registrar_resultado("seguridad", info) # Se guarda para el reporte
-                respuesta_texto = f"Chequé lo de seguridad en {muni_real} y está {datos['CATEGORIA_SEGURIDAD']}."
+            # --- LÓGICA ESTATAL YUCATÁN ---
+            if muni_sucio.lower() in ["yucatan", "yucatán", "estado", "todo el estado"]:
+                riesgo_top = intel_service.df_seguridad['CATEGORIA_SEGURIDAD'].mode()[0]
+                aislados_tot = intel_service.df_seguridad['NEGOCIOS_AISLADOS'].sum()
+                info = f"Análisis Estatal Seguridad: {riesgo_top} - Negocios Aislados Totales: {aislados_tot}"
+                bot_personal.registrar_resultado("seguridad", info)
+                respuesta_texto = f"A nivel estatal la seguridad pinta como {riesgo_top} ne’. Ya registré los puntos críticos para el análisis estratégico."
             else:
-                respuesta_texto = f"Fíjate que no tengo el reporte de seguridad de {muni_real} a la mano."
+                muni_real = intel_service.limpiar_municipio(muni_sucio, pilar="seguridad")
+                filtro = intel_service.df_seguridad[intel_service.df_seguridad['NOM_MUN'] == muni_real]
+                if not filtro.empty:
+                    datos = filtro.iloc[0]
+                    info = f"Municipio: {muni_real} - Riesgo: {datos['CATEGORIA_SEGURIDAD']} - Aislados: {int(datos['NEGOCIOS_AISLADOS'])}"
+                    bot_personal.registrar_resultado("seguridad", info)
+                    respuesta_texto = f"Chequé lo de seguridad en {muni_real} y está {datos['CATEGORIA_SEGURIDAD']}."
+                else:
+                    respuesta_texto = f"Fíjate que no tengo el reporte de seguridad de {muni_sucio} a la mano ne’."
             
         # (Aquí puedes añadir después los de Seguridad y Servicios)
     else:

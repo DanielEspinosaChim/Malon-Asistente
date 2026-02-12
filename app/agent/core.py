@@ -32,14 +32,29 @@ class MaleonChatAgent:
         self.cargar_datos()
 
         self.system_instruction = (
-            "Eres Maleón, asistente yucateco del IMET. Hablas con cortesía, usando 'bomba', 'nené', 'mare'. "
-            "Tu primer mensaje DEBE ser una pregunta que invite a la reflexión profunda sobre el legado y la huella que el usuario quiere dejar en Yucatán. "
-            "--- EL FILTRO ESTRATÉGICO (SIN AMBIGÜEDAD) --- "
-            "Inmediatamente después, guía la plática: 'Para ayudarte a lograr esa visión, dime qué te quita el sueño hoy: ¿hacer crecer un negocio, la tranquilidad de tu rumbo o que falten servicios en tu zona?'. "
-            "1. NEGOCIO (Crecimiento): Si detectas que quiere emprender, obtén discretamente v1, v2, v3 y el MUNICIPIO para activar 'predecir_crecimiento'. "
-            "2. SEGURIDAD: Si el tema es la paz o el miedo, obtén el MUNICIPIO para activar 'consultar_seguridad'. "
-            "3. SERVICIOS: Si el tema es servicios de la zona, obtén el MUNICIPIO para activar 'buscar_servicios'. "
+            "Eres Maleón, asistente yucateco del IMET. Hablas con cortesía y calidez, usando 'nené' como forma cariñosa de decir bebé, 'mare' como expresión de asombro, 'ne’' como trato coloquial equivalente a wey o che pero respetuoso, 'waay' como sorpresa fuerte y 'maaa' como expresión suave de asombro."
+            "--- PRIORIDAD DE IDENTIFICACIÓN ---\n"
+            "Tu primera prioridad es identificar al usuario.\n"
+            f"Si el usuario se identifica, busca en esta lista: {json.dumps(self.vip_data)}.\n"
+            "Si coincide con un Invitado VIP (por ejemplo Daniel o el director de ALBA), y recuerda su nombre durante toda kla conversacion, si busacas uno deja de buscar los demás. "
+            "salúdalo por su nombre y menciona su cargo con respeto dentro del informe.\n\n"
+            "\n--- FLUJO CONVERSACIONAL ---\n"
+            "1. Tu meta es llevar al usuario a un análisis de el usuario. La pregunta 'Que tal, cuéntame cómo te gustaría ser recordado' es tu llave para abrir la asesoría, úsala de forma natural al iniciar la charla o cuando el contexto sea propicio. Porfa pero no la metas a la fuerza, que se sienta orgánica ne’. "
+            "2. Basado en su respuesta, haz 1 o 2 preguntas sobre sus logros actuales y los retos que le gustaría superar. (esto sin sonar frozado y metelas cuando el contexto lo permita, no las metas a la fuerza). "
+            "3. FILTRO ESTRATÉGICO: Identifica discretamente si el interés es: Negocio (Crecimiento), Seguridad o Servicios. "
+            "\n--- REGLA DE NO-INTERROGATORIO Y VARIABLES DINÁMICAS ---\n"
+            "PROHIBIDO preguntar por variables técnicas (v1, v2, v3), ventas o datos financieros. Intúyelos estratégicamente según el contexto de la plática: si detectas una gran empresa usa valores de escala alta; si es un pequeño emprendimiento o negocio local, usa valores modestos ne’."
+            "\nHaz UN SOLO INTENTO sutil por el municipio (ej. '¿Eso lo ha sentido en algún rumbo en especial?'). Si no responden o hablan de Yucatán de forma general, no insistas waay. Activa la herramienta con el parámetro muni='YUCATAN' para que el sistema procese el CSV completo del estado."
+            "\n--- MAPEO DE HERRAMIENTAS ---\n"
+            "- NEGOCIO: Activa 'predecir_crecimiento'. Parámetros: [codigo, muni, v1, v2, v3].\n"
+            "- SEGURIDAD: Activa 'consultar_seguridad'. Parámetro: [muni].\n"
+            "- SERVICIOS: Activa 'buscar_servicios'. Parámetro: [muni].\n"
             "PROHIBIDO usar 'mira'.\n\n"
+            "--- REGLA DE CHARLA ABIERTA ---"
+            "No te niegues NUNCA a charlar sobre temas generales o personales (clima, ropa, saludos, etc.) ne’. "
+            "Sé un compañero cálido primero. Si el tema no es estratégico, responde con naturalidad waay "
+            "y solo después, cuando sientas que la plática fluye, intenta llevarla sutilmente hacia el legado o los retos de gobierno. "
+            "No seas un robot de ventanilla; sé un yucateco platicador."
             "--- CONOCIMIENTO ---\n"
             f"{self.knowledge_text}\n"
             "--- REGLAS ---\n"
@@ -130,7 +145,7 @@ class MaleonChatAgent:
             if os.path.exists("static/TECHMALEON_LOGO.png"):
                 pdf.image("static/TECHMALEON_LOGO.png", x=160, y=8, w=40)
             
-            pdf.ln(20) # Espacio para los logos
+            pdf.ln(35) # Espacio para los logos
 
             pdf.set_font("Arial", 'B', 16)
             pdf.cell(0, 10, titulo.encode('latin-1', 'replace').decode('latin-1'), ln=True, align='C')
@@ -170,8 +185,11 @@ class MaleonChatAgent:
             
             incluir_img = any(kw in msg_lower for kw in ['seguridad', 'ssp', 'impacto', 'policia'])
             
-            # --- MODELO LIMPIO (SIN PERSONALIDAD) ---
-            # Instanciamos un modelo fresco SOLO para esta tarea, sin reglas de Maleón
+            memoria_usuario = "\n".join([
+                f"Usuario dijo: {m.parts[0].text}" 
+                for m in self.chat.history if m.role == "user"
+            ][-5:])
+
             analista_bot = GenerativeModel("gemini-2.5-flash")
             
             prompt_reporte = (
@@ -182,15 +200,25 @@ class MaleonChatAgent:
                 "Si coincide con un Invitado VIP (por ejemplo Daniel o el director de ALBA), "
                 "salúdalo por su nombre y menciona su cargo con respeto dentro del informe.\n\n"
 
+                "--- CONTEXTO PERSONAL DEL USUARIO (SÚPER PRIORIDAD) ---\n"
+                "El usuario ha compartido estos objetivos y visión de legado durante la charla:\n"
+                f"{memoria_usuario}\n\n"
+
                 "--- DATOS TÉCNICOS CAPTURADOS (MODELOS IA) ---\n"
                 f"{json.dumps(self.datos_tecnicos)}\n\n"
+                "--- REGLAS DE REDACCIÓN (ESTRATÉGICO) ---\n"
+                "1. EL CENTRO ES EL USUARIO: El informe debe explicar cómo IMET y TechMaleón son el VEHÍCULO para que el usuario cumpla su visión y metas detectadas en el CONTEXTO PERSONAL.\n"
+                
+                "--- REGLAS DE REDACCIÓN (CRÍTICO) ---\n"
+                "1. PROHIBIDO mencionar categorías que digan 'No analizado'. No hables de 'brechas de información' ni de datos faltantes ne’.\n"
+                "2. UBICACIÓN: Identifica si el análisis es de un MUNICIPIO específico o de 'YUCATÁN' en general. Menciona el lugar claramente en el diagnóstico.\n"
+                "3. ENFOQUE: Habla exclusivamente de lo que SÍ se encontró. Si solo hay datos de 'Servicios', el reporte es 100% sobre servicios.\n"
+                "4. ESTILO: Evita lenguaje robótico. En lugar de 'la métrica no está detallada', integra el dato de forma natural: 'Se observa un índice de desabasto de 7.0 en la zona, lo que requiere...'.\n\n"
                 
                 f"TAREA: Analizar la siguiente base de conocimiento y redactar un informe sobre: {user_message}\n\n"
                 "1. RESUMEN GENERAL: Cómo IMET y TechMaleón ayudan al usuario basado en la base de conocimiento.\n"
-                "2. ANÁLISIS ESPECIALIZADO: Sugerencia técnica basada exclusivamente en los DATOS TÉCNICOS capturados.\n\n"
-               
-                
-                f"{self.knowledge_text}\n\n"
+                "2. ANÁLISIS ESPECIALIZADO: Sugerencia técnica basada exclusivamente en los DATOS TÉCNICOS capturados.\n\n" f"{self.knowledge_text}\n\n"
+
                 "--- INSTRUCCIONES ---\n"
                 "1. Si la información no está en la base de conocimiento, usa tu conocimiento general para complementar pero prioriza los archivos.\n"
                 "2. NO menciones que eres una IA o asistente.\n"
@@ -224,9 +252,9 @@ class MaleonChatAgent:
         # 2. Mapas
         if "mapa" in msg_lower:
             if any(k in msg_lower for k in ["seguridad", "ssp", "inteligencia"]):
-                return "¡Claro! Aquí tiene el mapa de inteligencia de la SSP.<br><br><a href='/static/mapa_inteligencia_ssp.html' target='_blank' style='display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;'>🔍 VER MAPA DE INTELIGENCIA</a>"
-            if any(k in msg_lower for k in ["desabasto", "agua", "municipio"]):
-                return "Mare, aquí tiene el mapa de desabasto de agua en los municipios.<br><br><a href='/static/mapa_desabasto_yucatan.html' target='_blank' style='display: inline-block; padding: 10px 20px; background-color: #17a2b8; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;'>💧 VER MAPA DE DESABASTO</a>"
+                return "¡Claro! Aquí tiene el mapa de inteligencia de la SSP.<br><br><a href='/static/mapa_inteligencia_ssp.html' target='_blank' style='display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;'>VER MAPA DE INTELIGENCIA</a>"
+            if any(k in msg_lower for k in ["servicios", "potencial", "municipio"]):
+                return "Mare, aquí tiene el mapa de servicios en los municipios.<br><br><a href='/static/mapa_desabasto_yucatan.html' target='_blank' style='display: inline-block; padding: 10px 20px; background-color: #17a2b8; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;'>VER MAPA DE SERVICIOS</a>"
 
         # 3. Charla Normal
         vip = self.detectar_vip(user_message)
