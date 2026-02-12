@@ -1,9 +1,61 @@
 const btn = document.getElementById('btn-hablar'); 
 const mouth = document.getElementById('mouth-img');
 const eyes = document.getElementById('eyes-img');
-const statusText = document.getElementById('status');
 const avatarContainer = document.getElementById('avatar-container');
+const chatHistory = document.getElementById('chat-history');
 let sessionId = crypto.randomUUID();
+
+// --- LÓGICA DE HISTORIAL ---
+function addMessageToHistory(text, sender) {
+    const msgDiv = document.createElement('div');
+    msgDiv.classList.add('message');
+    msgDiv.classList.add(sender === 'user' ? 'user-message' : 'bot-message');
+    msgDiv.innerHTML = text; // innerHTML para soportar enlaces de reportes
+    chatHistory.appendChild(msgDiv);
+    
+    // Auto-scroll al final
+    chatHistory.scrollTop = chatHistory.scrollHeight;
+}
+
+function showInterimUserMessage(text) {
+    let tempBubble = document.getElementById('temp-user-bubble');
+    if (!tempBubble) {
+        tempBubble = document.createElement('div');
+        tempBubble.id = 'temp-user-bubble';
+        tempBubble.classList.add('message', 'user-message');
+        tempBubble.style.opacity = '0.6'; // Apariencia de borrador
+        tempBubble.style.fontStyle = 'italic';
+        chatHistory.appendChild(tempBubble);
+    }
+    tempBubble.innerText = text;
+    chatHistory.scrollTop = chatHistory.scrollHeight;
+}
+
+function removeInterimUserMessage() {
+    const tempBubble = document.getElementById('temp-user-bubble');
+    if (tempBubble) tempBubble.remove();
+}
+
+function showTypingIndicator() {
+    const typingDiv = document.createElement('div');
+    typingDiv.id = 'typing-indicator-container';
+    typingDiv.classList.add('message', 'bot-message');
+    typingDiv.innerHTML = `
+        <div class="typing-indicator">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    `;
+    chatHistory.appendChild(typingDiv);
+    chatHistory.scrollTop = chatHistory.scrollHeight;
+}
+
+function removeTypingIndicator() {
+    const indicator = document.getElementById('typing-indicator-container');
+    if (indicator) indicator.remove();
+}
+
 // --- RECONOCIMIENTO DE VOZ (STT) ---
 const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
 recognition.lang = 'es-MX';
@@ -72,7 +124,6 @@ btn.onclick = () => {
             isListening = true;
             avatarContainer.classList.add('listening'); // Efecto visual
             btn.innerText = 'PULSAR PARA DETENER 🟥';
-            statusText.innerText = "Maleón te escucha atentamente...";
         } catch (e) {
             console.error("Error al iniciar reconocimiento:", e);
         }
@@ -81,7 +132,6 @@ btn.onclick = () => {
         isListening = false;
         avatarContainer.classList.remove('listening'); // Quitar efecto visual
         btn.innerText = 'PULSAR PARA HABLAR';
-        statusText.innerText = "Procesando mensaje...";
     }
 };
 
@@ -94,29 +144,39 @@ recognition.onresult = (event) => {
             interimTranscript += event.results[i][0].transcript;
         }
     }
-    statusText.innerText = "Diciendo: " + (finalTranscript + interimTranscript);
+    // Mostrar lo que se está diciendo en tiempo real
+    if (finalTranscript || interimTranscript) {
+        showInterimUserMessage(finalTranscript + interimTranscript);
+    }
 };
 
 recognition.onend = () => {
     avatarContainer.classList.remove('listening'); // Por seguridad
+    
+    // Quitamos la burbuja temporal
+    removeInterimUserMessage();
+
     if (!isListening && finalTranscript.trim() !== '') {
         const textoAEnviar = finalTranscript;
         finalTranscript = ''; // Limpiamos inmediatamente para evitar reenvíos
         
+        // Agregar al historial visual (ya fijo)
+        addMessageToHistory(textoAEnviar, 'user');
+
         // Obtenemos la hora actual del usuario
         const ahora = new Date();
         const horaStr = ahora.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
         
         enviarAlBackend(textoAEnviar, horaStr);
-    } else if (!isListening) {
-        statusText.innerText = "Esperando interacción...";
     }
 };
 
 // --- ENVÍO AL BACKEND Y REPRODUCCIÓN DE AUDIO ---
 async function enviarAlBackend(texto, hora = null) {
-    statusText.innerText = "Maleón está pensando...";
     
+    // Mostramos indicador de escritura
+    showTypingIndicator();
+
     // Creamos un nuevo controlador para esta petición
     abortController = new AbortController();
 
@@ -138,9 +198,15 @@ async function enviarAlBackend(texto, hora = null) {
         const data = await response.json();
         abortController = null; // Petición terminada con éxito
 
+        // Quitamos el indicador de escritura
+        removeTypingIndicator();
+
         if (!data || !data.reply) {
             throw new Error("Respuesta del servidor incompleta");
         }
+
+        // Agregar al historial visual
+        addMessageToHistory(data.reply, 'bot');
 
         const textoLimpio = data.reply.replace(/[^\wáéíóúñ\s]/gi, '');
 
@@ -155,36 +221,27 @@ async function enviarAlBackend(texto, hora = null) {
             };
 
             currentAudio.onplay = () => {
-                statusText.innerHTML = data.reply;
                 animarBocaSincronizada(textoLimpio, currentAudio);
             };
 
             currentAudio.onerror = (e) => {
                 console.error("Error cargando audio:", e);
-                statusText.innerHTML = data.reply;
             };
 
             currentAudio.onended = () => {
-                statusText.innerText = "Esperando interacción...";
                 mouth.src = "/avatar/mouth_neutral.png";
                 currentAudio = null;
             };
 
             currentAudio.src = data.audio_url; // Dispara la carga
-        } else {
-            // Si no hay audio, solo mostramos el texto
-            statusText.innerHTML = data.reply;
-            setTimeout(() => {
-                if (!currentAudio) statusText.innerText = "Esperando interacción...";
-            }, 5000);
         }
 
     } catch (error) {
+        removeTypingIndicator();
         if (error.name === 'AbortError') {
             console.log("Petición cancelada porque el usuario inició otra acción.");
         } else {
             console.error("Error:", error);
-            statusText.innerText = "¡Ay mare! Falló la conexión.";
             btn.innerText = 'PULSAR PARA HABLAR';
         }
     } finally {
