@@ -248,3 +248,23 @@ async function enviarAlBackend(texto, hora = null) {
         abortController = null;
     }
 }
+
+
+function enviarPorCorreo(pdfPath) {
+    // 1. Construimos la ruta completa del PDF para que el link funcione
+    const urlCompleta = window.location.origin + pdfPath;
+    
+    // 2. Preparamos el asunto y el cuerpo del mensaje
+    const asunto = encodeURIComponent("📊 Mi Reporte Estratégico - TechMaleón");
+    const cuerpo = encodeURIComponent(
+        "¡Hola! \n\n" +
+        "Te comparto el reporte estratégico que generamos con Maleón. \n" +
+        "Puedes verlo y descargarlo aquí: \n" + 
+        urlCompleta + "\n\n" +
+        "Saludos, \n" +
+        "Alejandro Espinosa"
+    );
+
+    // 3. ¡La magia! Esto abre tu Gmail/Outlook con todo listo ne'
+    window.location.href = `mailto:?subject=${asunto}&body=${cuerpo}`;
+}

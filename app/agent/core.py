@@ -242,7 +242,8 @@ class MaleonChatAgent:
                 ruta = self._crear_pdf(f"ANALISIS ESTRATEGICO: {user_message[:40].upper()}", texto_final, incluir_grafico=incluir_img)
                 
                 if ruta:
-                    return f"Listo nené, ya terminé el análisis profundo sobre ese tema. Aquí tiene el documento para su revisión.<br><br><a href='{ruta}' target='_blank' style='display: inline-block; padding: 10px 20px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;'>📥 DESCARGAR REPORTE PDF</a>"
+                    return f"Listo nené, ya terminé el análisis profundo sobre ese tema. Aquí tiene el documento para su revisión.<br><br><a href='{ruta}' target='_blank' style='display: inline-block; padding: 10px 20px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;'>📥 DESCARGAR REPORTE PDF</a>" \
+                           f"<button onclick=\"enviarPorCorreo('{ruta}')\" class='btn-email'>📧 ENVIAR A MI CORREO</button>"
                 else:
                     return "¡Ay fo! Hubo un problema al crear el archivo PDF."
             except Exception as e:

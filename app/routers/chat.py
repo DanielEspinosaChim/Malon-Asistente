@@ -12,6 +12,7 @@ from app.services.inteligencia_service import InteligenciaService
 from app.config import BLACKLIST
 
 
+
 router = APIRouter()
 sesiones_activas = {} 
 PALABRAS_CONTEXTUALES = [
@@ -154,3 +155,4 @@ async def chat(msg: Msg):
 
 
     return nueva_resp
+
